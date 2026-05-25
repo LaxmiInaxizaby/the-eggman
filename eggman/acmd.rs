@@ -483,14 +483,6 @@ unsafe extern "C" fn game_landingairf(agent: &mut L2CAgentBase) {
 }
 
 unsafe extern "C" fn game_landingairb(agent: &mut L2CAgentBase) {
-	    frame(agent.lua_state_agent, 100.0);
-    if macros::is_excute(agent) {
-        StatusModule::change_status_request(
-        agent.module_accessor, 
-        *FIGHTER_STATUS_KIND_DEAD, 
-        false
-    );
-    }
 }
 
 unsafe extern "C" fn game_attackdash(agent: &mut L2CAgentBase) {
@@ -530,7 +522,7 @@ unsafe extern "C" fn game_attackairlw(agent: &mut L2CAgentBase) {
     frame(agent.lua_state_agent, 12.0);
     for _ in 0..28 {
     if macros::is_excute(agent) {
-		KineticModule::add_speed(agent.module_accessor, &Vector3f{x: 0.0, y: 0.3, z: 0.0});
+		KineticModule::add_speed(agent.module_accessor, &Vector3f{x: 0.0, y: 0.21, z: 0.0});
         macros::ATTACK(agent, 0, 0, Hash40::new("barriga"), 0.5, 367, 100, 110, 0, 16.0, 0.0, 0.0, 0.0, None, None, None, 0.5, 0.5, *ATTACK_SETOFF_KIND_OFF, *ATTACK_LR_CHECK_POS, true, 0, 0.0, 0, false, false, false, false, true, *COLLISION_SITUATION_MASK_GA, *COLLISION_CATEGORY_MASK_ALL, *COLLISION_PART_MASK_ALL, false, Hash40::new("collision_attr_elec"), *ATTACK_SOUND_LEVEL_M, *COLLISION_SOUND_ATTR_ELEC, *ATTACK_REGION_BODY);
 		macros::ATTACK(agent, 1, 0, Hash40::new("barriga"), 0.5, 367, 100, 110, 0, 6.0, 0.0, 0.0, 0.0, None, None, None, 0.5, 0.5, *ATTACK_SETOFF_KIND_OFF, *ATTACK_LR_CHECK_POS, true, 0, 0.0, 0, false, false, false, false, true, *COLLISION_SITUATION_MASK_GA, *COLLISION_CATEGORY_MASK_ALL, *COLLISION_PART_MASK_ALL, false, Hash40::new("collision_attr_elec"), *ATTACK_SOUND_LEVEL_M, *COLLISION_SOUND_ATTR_ELEC, *ATTACK_REGION_BODY);
 		macros::ATTACK(agent, 2, 0, Hash40::new("barriga"), 0.5, 367, 100, 110, 0, 6.0, 0.0, 0.0, 0.0, None, None, None, 0.5, 0.5, *ATTACK_SETOFF_KIND_OFF, *ATTACK_LR_CHECK_POS, true, 0, 0.0, 0, false, false, false, false, true, *COLLISION_SITUATION_MASK_GA, *COLLISION_CATEGORY_MASK_ALL, *COLLISION_PART_MASK_ALL, false, Hash40::new("collision_attr_elec"), *ATTACK_SOUND_LEVEL_M, *COLLISION_SOUND_ATTR_ELEC, *ATTACK_REGION_BODY);
@@ -544,7 +536,7 @@ unsafe extern "C" fn game_attackairlw(agent: &mut L2CAgentBase) {
     wait(agent.lua_state_agent, 1.0);
 }
 if macros::is_excute(agent) {
-	macros::ATTACK(agent, 0, 0, Hash40::new("barriga"), 1.0, 90, 160, 0, 70, 12.0, 0.0, 0.0, 0.0, None, None, None, 1.0, 1.0, *ATTACK_SETOFF_KIND_ON, *ATTACK_LR_CHECK_B, false, 0, 0.0, 0, false, false, false, false, true, *COLLISION_SITUATION_MASK_GA, *COLLISION_CATEGORY_MASK_ALL, *COLLISION_PART_MASK_ALL, false, Hash40::new("collision_attr_elec"), *ATTACK_SOUND_LEVEL_L, *COLLISION_SOUND_ATTR_ELEC, *ATTACK_REGION_KICK);
+	macros::ATTACK(agent, 0, 0, Hash40::new("barriga"), 1.0, 270, 160, 0, 70, 12.0, 0.0, 0.0, 0.0, None, None, None, 1.0, 1.0, *ATTACK_SETOFF_KIND_ON, *ATTACK_LR_CHECK_B, false, 0, 0.0, 0, false, false, false, false, true, *COLLISION_SITUATION_MASK_GA, *COLLISION_CATEGORY_MASK_ALL, *COLLISION_PART_MASK_ALL, false, Hash40::new("collision_attr_elec"), *ATTACK_SOUND_LEVEL_L, *COLLISION_SOUND_ATTR_ELEC, *ATTACK_REGION_KICK);
 }
 wait(agent.lua_state_agent, 2.0);
 if macros::is_excute(agent) {
@@ -924,7 +916,7 @@ unsafe extern "C" fn game_specialhisquat(agent: &mut L2CAgentBase) {
 
 pub fn install() {
     Agent::new("sonic")
-	.set_costume([24, 25, 26, 27, 28, 29, 30, 31].to_vec())
+	.set_costume(crate::eggman_slots())
 		.game_acmd("game_escapef", game_escapef, Priority::Default)
 		.sound_acmd("sound_cliffwait", sound_cliffwait, Priority::Default)
 		.game_acmd("game_stepjump", game_stepjump, Priority::Default)

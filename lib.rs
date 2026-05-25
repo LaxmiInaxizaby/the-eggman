@@ -1,5 +1,4 @@
 #![feature(
-    concat_idents,
     proc_macro_hygiene
 )]
 #![allow(
@@ -20,18 +19,46 @@ use smash::lib::lua_const::*;
 mod eggman;
 
 pub static mut MARKED_COLORS: [bool; 256] = [false; 256];
-
+pub static mut MARKED_SLOTS: Vec<i32> = Vec::new();
 
 extern "C" fn mods_mounted(_ev: arcropolis_api::Event) {
-    let lowest_color: i32 = 24;
-    let color_num: i32 = 8;
-    let marked_slots: Vec<i32> = (24..=31).collect();
+    const FIGHTER_NAME: &str = "sonic";
+    const MARKER_FILE: &str = "eggman.marker";
 
-    unsafe {
-        for slot in &marked_slots {
-            MARKED_COLORS[*slot as usize] = true;
+    let mut lowest_color: i32 = -1;
+    let mut marked_slots: Vec<i32> = vec![];
+
+    for x in 0..256 {
+        if std::fs::read(format!(
+            "mods:/fighter/{}/model/body/c{:02}/{}", FIGHTER_NAME, x, MARKER_FILE
+        )).is_ok() {
+            unsafe {
+                marked_slots.push(x as _);
+                MARKED_COLORS[x as usize] = true;
+                if lowest_color == -1 {
+                    lowest_color = x as _;
+                }
+            }
         }
     }
+
+    if lowest_color == -1 {
+        return;
+    }
+
+    unsafe {
+        MARKED_SLOTS = marked_slots.clone();
+    }
+
+    let color_num = {
+        unsafe {
+            let mut index = lowest_color;
+            while index < 256 && MARKED_COLORS[index as usize] {
+                index += 1;
+            }
+            (index - lowest_color) as u8
+        }
+    };
 
     update_float_2(*FIGHTER_KIND_SONIC, marked_slots.clone(), (hash40("walk_accel_mul"), 0, 0.105));
     update_float_2(*FIGHTER_KIND_SONIC, marked_slots.clone(), (hash40("walk_accel_add"), 0, 0.105));
@@ -55,7 +82,7 @@ extern "C" fn mods_mounted(_ev: arcropolis_api::Event) {
     update_float_2(*FIGHTER_KIND_SONIC, marked_slots.clone(), (hash40("jump_aerial_y"), 0, 30.0));
     update_float_2(*FIGHTER_KIND_SONIC, marked_slots.clone(), (hash40("air_accel_x_mul"), 0, 0.05));
     update_float_2(*FIGHTER_KIND_SONIC, marked_slots.clone(), (hash40("air_accel_x_add"), 0, 0.01));
-    update_float_2(*FIGHTER_KIND_SONIC, marked_slots.clone(), (hash40("air_speed_x_stable"), 0, 1.35));
+    update_float_2(*FIGHTER_KIND_SONIC, marked_slots.clone(), (hash40("air_speed_x_stable"), 0, 0.95));
     update_float_2(*FIGHTER_KIND_SONIC, marked_slots.clone(), (hash40("air_brake_x"), 0, 0.015));
     update_float_2(*FIGHTER_KIND_SONIC, marked_slots.clone(), (hash40("air_accel_y"), 0, 0.11));
     update_float_2(*FIGHTER_KIND_SONIC, marked_slots.clone(), (hash40("air_speed_y_stable"), 0, 1.73));
@@ -229,10 +256,15 @@ extern "C" fn mods_mounted(_ev: arcropolis_api::Event) {
     });
 }
 
+pub fn eggman_slots() -> Vec<usize> {
+    unsafe { (&raw const MARKED_SLOTS).as_ref().unwrap().iter().map(|&x| x as usize).collect() }
+}
+
+
 #[skyline::main(name = "smashline_test")]
 pub fn main() {
     unsafe {
-        extern "C" {
+        unsafe extern "C" {
             fn arcrop_register_event_callback(
                 ty: arcropolis_api::Event,
                 callback: arcropolis_api::EventCallbackFn,
